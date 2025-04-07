@@ -312,7 +312,96 @@ static char *availability_constraints(int k, int n, Load *l)
  * @return String contendo as restrições de proporcionalidade no formato lp_solve.
  *         Retorna NULL em caso de erro de alocação.
  */
-static char *proportionality_constraints(int k, int n, Compartment *c);
+static char *proportionality_constraints(int k, int n, Compartment *c)
+{
+    size_t size = 64, l_size = 64;
+    char *proportionality = malloc(size);
+    char *line = malloc(size);
+    if (!proportionality || !line)
+    {
+        fprintf(stderr, "[proportionality_constraints] Erro ao alocar memória inicial.\n");
+        return NULL;
+    }
+
+    proportionality[0] = line[0] = '\0';
+
+    int a = 0;
+    int b = a + 1;
+    while (a < k - 1)
+    {
+        char term[32];
+        snprintf(term, sizeof(term), "%dx%d%d", c[b].w, a + 1, 1);
+        strcpy(line, term);
+        for (int i = 1; i < n; i++)
+        {
+            snprintf(term, sizeof(term), " + %dx%d%d", c[b].w, a + 1, i + 1);
+
+            size_t new_len = strlen(line) + strlen(term) + 4;
+            if (new_len > l_size)
+            {
+                l_size *= new_len;
+                char *temp = realloc(line, l_size);
+                if (!temp)
+                {
+                    fprintf(stderr, "[proportionality_constraints] Erro ao realocar memória.\n");
+                    free(line);
+                    return NULL;
+                }
+                line = temp;
+            }
+
+            strcat(line, term);
+        }
+        for (int i = 0; i < n; i++)
+        {
+            snprintf(term, sizeof(term), " - %dx%d%d", c[a].w, b + 1, i + 1);
+
+            size_t new_len = strlen(line) + strlen(term) + 4;
+            if (new_len > l_size)
+            {
+                l_size *= new_len;
+                char *temp = realloc(line, l_size);
+                if (!temp)
+                {
+                    fprintf(stderr, "[proportionality_constraints] Erro ao realocar memória.\n");
+                    free(line);
+                    return NULL;
+                }
+                line = temp;
+            }
+
+            strcat(line, term);
+        }
+        snprintf(term, sizeof(term), " = 0;\n");
+        strcat(line, term);
+
+        size_t new_len = strlen(proportionality) + strlen(line) + 4;
+        if (new_len > size)
+        {
+            size *= new_len;
+            char *temp = realloc(proportionality, size);
+            if (!temp)
+            {
+                fprintf(stderr, "[proportionality_constraints] Erro ao realocar memória.\n");
+                free(proportionality);
+                return NULL;
+            }
+            proportionality = temp;
+        }
+
+        strcat(proportionality, line);
+
+        if (b < k - 1)
+            b++;
+        else
+        {
+            a++;
+            b = a + 1;
+        }
+    }
+
+    return proportionality;
+}
 
 /**
  * Gera as restrições de não-negatividade para todas as variáveis.
@@ -384,6 +473,16 @@ char *generate_lp(int k, int n, Compartment *c, Load *l)
     model[0] = '\0';
 
     char *aux = objective(k, n, l);
+
+    if (!append(&model, aux))
+    {
+        free(model);
+        return NULL;
+    }
+
+    aux = proportionality_constraints(k, n, c);
+
+    strcat(model, "\n");
 
     if (!append(&model, aux))
     {

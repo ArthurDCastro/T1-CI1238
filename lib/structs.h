@@ -1,17 +1,27 @@
 #ifndef STRUCTS_H
 #define STRUCTS_H
 
+/// Representa um compartimento de carga.
 typedef struct
 {
-    int w; // capacidade de peso
-    int v; // capacidade de volume
+    /// Capacidade máxima de peso do compartimento.
+    int w;
+
+    /// Capacidade máxima de volume do compartimento.
+    int v;
 } Compartment;
 
+/// Representa um tipo de carregamento.
 typedef struct
 {
-    int p; // peso total
-    int t; // volume total
-    int g; // ganho por tonelada
+    /// Peso total disponível do carregamento.
+    int p;
+
+    /// Volume total do carregamento.
+    int t;
+
+    /// Ganho (lucro) por tonelada do carregamento.
+    int g;
 } Load;
 
-#endif
+#endif // STRUCTS_H
