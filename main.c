@@ -22,9 +22,7 @@ int main()
         return 1; // erro ao alocar memória ou ler
     }
 
-    print_structs(k, n, c, l);
-
-    printf("\n%s\n", generate_lp(k, n, c, l));
+    printf("%s", generate_lp(k, n, c, l));
 
     free(c);
     free(l);
