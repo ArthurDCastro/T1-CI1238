@@ -8,7 +8,11 @@
 int main()
 {
     int k, n;
-    scanf("%d %d", &k, &n);
+    if (scanf("%d %d", &k, &n) != 2)
+    {
+        fprintf(stderr, "Erro ao ler k e n.\n");
+        return 1;
+    }
 
     Compartment *c;
     Load *l;

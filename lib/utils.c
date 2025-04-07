@@ -1,5 +1,7 @@
-#include <stdio.h>
 #include "utils.h"
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 void print_structs(int k, int n, Compartment *c, Load *l)
 {
