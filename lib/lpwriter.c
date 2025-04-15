@@ -312,6 +312,7 @@ static char *availability_constraints(int k, int n, Load *l)
  * @return String contendo as restrições de proporcionalidade no formato lp_solve.
  *         Retorna NULL em caso de erro de alocação.
  */
+ 
 static char *proportionality_constraints(int k, int n, Compartment *c)
 {
     size_t size = 64, l_size = 64;
@@ -329,6 +330,15 @@ static char *proportionality_constraints(int k, int n, Compartment *c)
     int b = a + 1;
     while (a < k - 1)
     {
+
+        // Verificar w_a e w_b
+        if (c[a].w == 0 || c[b].w == 0) {
+            fprintf(stderr, "[proportionality_constraints] Erro: w_%d ou w_%d é zero.\n", a+1, b+1);
+            free(proportionality);
+            free(line);
+            return NULL;
+        }
+
         char term[32];
         snprintf(term, sizeof(term), "%dx%d%d", c[b].w, a + 1, 1);
         strcpy(line, term);
